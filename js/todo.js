@@ -1,13 +1,5 @@
 ( () => {
-  let todolist = [ {
-    id: 0,
-    title: 'foo',
-    done: true,
-  }, {
-    id: 1,
-    title: 'bar',
-    done: false,
-  } ];
+  let todolist = [];
 
   // Document Ready
   $( () => {
@@ -30,6 +22,10 @@
   // Show List
   let showList = todolist => {
     clearList();
+    // storage
+    if ( localStorage.getItem( 'todolist' ) ) {
+      todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
+    }
     todolist.forEach( v => {
       let item = `
             <li class="mdl-list__item">
@@ -69,12 +65,15 @@
 
   // Add Todo
   let addTodo = todolist => {
+    let id = todolist.length === 0 ? 0 : Math.max.apply( null, todolist.map( o => o.id ) ) + 1;
     todolist.push( {
-      id: Math.max.apply( null, todolist.map( o => o.id ) ) + 1,
+      id,
       title: $( '#newTodo' )
         .val(),
-      done: false,
+        done: false,
     } );
+    // storage
+    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     showList( todolist );
   }
 
@@ -88,6 +87,8 @@
       }
       return v;
     } );
+    // storage
+    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     console.log( todolist );
   }
 
@@ -101,6 +102,8 @@
       .remove();
     // data remove
     todolist = todolist.filter( ( v ) => v.id !== Number( id ) );
+    // storage
+    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     console.log( todolist );
   }
 
