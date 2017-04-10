@@ -1,29 +1,33 @@
 ( () => {
   let todolist = [];
+  let eventstore = $( '#eventstore' ).prop( 'checked' );
 
   // Document Ready
   $( () => {
     showList( todolist );
     // add event
-    $( '#addTodo' )
-      .on( 'click', () => {
-        console.log( todolist );
-        addTodo( todolist )
-      } );
+    $( '#addTodo' ).on( 'click', () => {
+      console.log( todolist );
+      addTodo( todolist )
+    } );
   } );
+  // eventstore event
+  $( '#eventstore' ).on( 'click', () => {
+    eventstore = $( '#eventstore' ).prop( 'checked' );
+    showList( todolist );
+    console.log( eventstore );
+  } )
 
   // Functions
   // Clear List
-  let clearList = () => {
-    $( '#list ul' )
-      .empty();
-  }
+  let clearList = () => $( '#list ul' ).empty();
 
   // Show List
   let showList = todolist => {
     clearList();
-    // storage
-    if ( localStorage.getItem( 'todolist' ) ) {
+    if ( eventstore ) { // eventstore
+
+    } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
     }
     todolist.forEach( v => {
@@ -31,7 +35,7 @@
             <li class="mdl-list__item">
               <span class="mdl-list__item-primary-content">
                 <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${v.id}">
-                  <input type="checkbox" id="${v.id}" class="mdl-checkbox__input" ${v.done? 'checked': ''} />
+                  <input type="checkbox" id="${v.id}" class="mdl-checkbox__input todo" ${v.done? 'checked': ''} />
                   <span class="mdl-checkbox__label">${v.title}</span>
                 </label>
               </span>
@@ -42,8 +46,7 @@
               </span>
             </li>
           `;
-      $( '#list ul' )
-        .append( item );
+      $( '#list ul' ).append( item );
     } );
     setEvents();
     console.log( todolist );
@@ -52,15 +55,13 @@
   // Set Events
   let setEvents = () => {
     // toggle
-    $( 'input[type=checkbox]' )
-      .on( 'click', function () {
-        toggleDone( this );
-      } );
+    $( '.todo' ).on( 'click', function () {
+      toggleDone( this );
+    } );
     // delete
-    $( '.del' )
-      .on( 'click', function () {
-        deleteTodo( this );
-      } );
+    $( '.del' ).on( 'click', function () {
+      deleteTodo( this );
+    } );
   }
 
   // Add Todo
@@ -72,8 +73,11 @@
         .val(),
         done: false,
     } );
-    // storage
-    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    if ( eventstore ) { // eventstore
+
+    } else { // localstorage
+      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    }
     showList( todolist );
   }
 
@@ -81,29 +85,31 @@
   let toggleDone = target => {
     // data toggle
     todolist = todolist.map( ( v ) => {
-      if ( v.id === Number( $( target )
-          .attr( 'id' ) ) ) {
+      if ( v.id === Number( $( target ).attr( 'id' ) ) ) {
         v.done = !v.done;
       }
       return v;
     } );
-    // storage
-    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    if ( eventstore ) { // eventstore
+
+    } else { // localstorage
+      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    }
     console.log( todolist );
   }
 
   // Delete Todo
   let deleteTodo = target => {
     // view remove
-    let id = $( target )
-      .attr( 'data-id' );
-    $( `#${id}` )
-      .parents( 'li' )
-      .remove();
+    let id = $( target ).attr( 'data-id' );
+    $( `#${id}` ).parents( 'li' ).remove();
     // data remove
     todolist = todolist.filter( ( v ) => v.id !== Number( id ) );
-    // storage
-    localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    if ( eventstore ) { // eventstore
+
+    } else { // localstorage
+      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+    }
     console.log( todolist );
   }
 
