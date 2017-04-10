@@ -4,32 +4,47 @@
 
   // Document Ready
   $( () => {
-    showList( todolist );
+    todolist = showList();
+    // eventstore event
+    $( '#eventstore' ).on( 'click', () => {
+      eventstore = $( '#eventstore' ).prop( 'checked' );
+      showList();
+    } );
     // add event
     $( '#addTodo' ).on( 'click', () => {
-      console.log( todolist );
       addTodo( todolist )
     } );
   } );
-  // eventstore event
-  $( '#eventstore' ).on( 'click', () => {
-    eventstore = $( '#eventstore' ).prop( 'checked' );
-    showList( todolist );
-    console.log( eventstore );
-  } )
 
-  // Functions
   // Clear List
   let clearList = () => $( '#list ul' ).empty();
 
   // Show List
-  let showList = todolist => {
+  let showList = () => {
     clearList();
+    let todolist = [];
     if ( eventstore ) { // eventstore
-
+      console.log( 'CALL getTodolistES' );
+      getTodolistES( showListItems );
     } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
+      showListItems( todolist );
     }
+    setEvents();
+    console.log( todolist );
+    return todolist;
+  }
+
+  // Show List Items
+  let showListItems = todolist => {
+    todolist = todolist.sort( ( a, b ) => {
+      if ( a.id < b.id ) {
+        return 1;
+      }
+      if ( a.id > b.id ) {
+        return -1;
+      }
+    } );
     todolist.forEach( v => {
       let item = `
             <li class="mdl-list__item">
@@ -48,8 +63,6 @@
           `;
       $( '#list ul' ).append( item );
     } );
-    setEvents();
-    console.log( todolist );
   }
 
   // Set Events
@@ -66,19 +79,20 @@
 
   // Add Todo
   let addTodo = todolist => {
-    let id = todolist.length === 0 ? 0 : Math.max.apply( null, todolist.map( o => o.id ) ) + 1;
-    todolist.push( {
+    let id = new Date().getTime();
+    let todo = {
       id,
-      title: $( '#newTodo' )
-        .val(),
+      title: $( '#newTodo' ).val(),
         done: false,
-    } );
+    };
+    todolist.push( todo );
     if ( eventstore ) { // eventstore
-
+      console.log( 'CALL addTodoES' );
+      addTodoES( todo, showList );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
+      showList();
     }
-    showList( todolist );
   }
 
   // Toggle Done
