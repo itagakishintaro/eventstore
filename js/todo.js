@@ -1,10 +1,11 @@
+let todolist = [];
+
 ( () => {
-  let todolist = [];
   let eventstore = $( '#eventstore' ).prop( 'checked' );
 
   // Document Ready
   $( () => {
-    todolist = showList();
+    showList();
     // eventstore event
     $( '#eventstore' ).on( 'click', () => {
       eventstore = $( '#eventstore' ).prop( 'checked' );
@@ -12,7 +13,7 @@
     } );
     // add event
     $( '#addTodo' ).on( 'click', () => {
-      addTodo( todolist )
+      addTodo();
     } );
   } );
 
@@ -21,22 +22,19 @@
 
   // Show List
   let showList = () => {
-    clearList();
-    let todolist = [];
+    console.log( 'SHOW LIST', todolist );
     if ( eventstore ) { // eventstore
-      console.log( 'CALL getTodolistES' );
-      getTodolistES( showListItems );
+      es.getTodolist( showListItems );
     } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-      showListItems( todolist );
+      showListItems();
     }
-    setEvents();
-    console.log( todolist );
-    return todolist;
   }
 
   // Show List Items
-  let showListItems = todolist => {
+  let showListItems = () => {
+    console.log( 'SHOW LIST ITEMS', todolist );
+    clearList();
     todolist = todolist.sort( ( a, b ) => {
       if ( a.id < b.id ) {
         return 1;
@@ -63,6 +61,7 @@
           `;
       $( '#list ul' ).append( item );
     } );
+    setEvents();
   }
 
   // Set Events
@@ -77,8 +76,10 @@
     } );
   }
 
+  /*********** ACTIONS **********/
   // Add Todo
-  let addTodo = todolist => {
+  let addTodo = () => {
+    console.log( 'ADD TODO', todolist );
     let id = new Date().getTime();
     let todo = {
       id,
@@ -87,16 +88,16 @@
     };
     todolist.push( todo );
     if ( eventstore ) { // eventstore
-      console.log( 'CALL addTodoES' );
-      addTodoES( todo, showList );
+      es.addTodo( todo, showListItems, todolist );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-      showList();
+      showListItems();
     }
   }
 
   // Toggle Done
   let toggleDone = target => {
+    console.log( 'TOGGLE DONE', todolist );
     // data toggle
     todolist = todolist.map( ( v ) => {
       if ( v.id === Number( $( target ).attr( 'id' ) ) ) {
@@ -109,11 +110,11 @@
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     }
-    console.log( todolist );
   }
 
   // Delete Todo
   let deleteTodo = target => {
+    console.log( 'DELETE TODO', todolist );
     // view remove
     let id = $( target ).attr( 'data-id' );
     $( `#${id}` ).parents( 'li' ).remove();
@@ -124,7 +125,6 @@
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     }
-    console.log( todolist );
   }
 
 } )();
