@@ -35,14 +35,7 @@ let todolist = [];
   let showListItems = () => {
     console.log( 'SHOW LIST ITEMS', todolist );
     clearList();
-    todolist = todolist.sort( ( a, b ) => {
-      if ( a.id < b.id ) {
-        return 1;
-      }
-      if ( a.id > b.id ) {
-        return -1;
-      }
-    } );
+    todolist = util.sortObjects( todolist, 'id', false );
     todolist.forEach( v => {
       let item = `
             <li class="mdl-list__item">
@@ -88,7 +81,7 @@ let todolist = [];
     };
     todolist.push( todo );
     if ( eventstore ) { // eventstore
-      es.addTodo( todo, showListItems, todolist );
+      es.addTodo( todo, showListItems );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
       showListItems();
@@ -105,8 +98,12 @@ let todolist = [];
       }
       return v;
     } );
+    let todo = {
+      id: $( target ).attr( 'id' ),
+      done: $( target ).prop( 'checked' ),
+    };
     if ( eventstore ) { // eventstore
-
+      es.toggleDone( todo );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     }

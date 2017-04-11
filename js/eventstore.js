@@ -5,7 +5,7 @@ let es = {};
 
   /********** COMMANDS **********/
   // Add To Do
-  es.addTodo = ( todo, showListItems, todolist ) => {
+  es.addTodo = ( todo, showListItems ) => {
     console.log( 'ADD TODO', todolist );
     $.ajax( {
       type: 'POST',
@@ -20,8 +20,17 @@ let es = {};
     } );
   }
 
-  let toggleDone = () => {
-
+  es.toggleDone = ( todo ) => {
+    console.log( 'TOGGLE DONE', todolist );
+    $.ajax( {
+      type: 'POST',
+      url,
+      data: JSON.stringify( todo ),
+      contentType: 'application/json',
+      headers: {
+        'ES-EventType': 'toggleDone'
+      }
+    } );
   }
 
   /********** QUERY **********/
@@ -40,12 +49,13 @@ let es = {};
     // aggregate todo list from events
   let aggregate = events => {
     let todolist = [];
+    events = util.sortObjects( events, 'updated', true );
     events.forEach( e => {
       if ( e.content.eventType === 'addTodo' ) {
         todolist.push( e.content.data );
       } else if ( e.content.eventType === 'toggleDone' ) {
         todolist.map( todo => {
-          if ( todo.id === e.content.data.id ) {
+          if ( todo.id === Number( e.content.data.id ) ) {
             todo.done = e.content.data.done;
           }
           return todo;
