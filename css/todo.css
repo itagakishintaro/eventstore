@@ -1,3 +1,7 @@
 .del {
   margin-left: 1em;
 }
+.deleted {
+  color: lightgray;
+  text-decoration: line-through;
+}
