@@ -42,11 +42,9 @@ let es = {};
   es.getTodolist = ( showListItems ) => {
       console.log( 'GET TODO LIST', todolist );
       let events = [];
-      getEntriesPromise().then( ( entries ) => {
-        Promise.all( getDataPromiseList( entries, events ) ).then( () => {
-          todolist = aggregate( events );
-          showListItems();
-        } );
+      getEntriesPromise().then( ( d ) => {
+        todolist = aggregate( d );
+        showListItems();
       } );
     }
     /********** Aggregate **********/
@@ -55,17 +53,19 @@ let es = {};
     let todolist = [];
     events = util.sortObjects( events, 'updated', true );
     events.forEach( e => {
-      if ( e.content.eventType === 'addTodo' ) {
-        todolist.push( e.content.data );
-      } else if ( e.content.eventType === 'toggleDone' ) {
+      let data = JSON.parse( e.data );
+      if ( e.eventType === 'addTodo' ) {
+        todolist.push( data );
+      } else if ( e.eventType === 'toggleDone' ) {
         todolist.map( todo => {
-          if ( todo.id === Number( e.content.data.id ) ) {
-            todo.done = e.content.data.done;
+          console.log( 'HERE', todo.id, data.id );
+          if ( todo.id === Number( data.id ) ) {
+            todo.done = data.done;
           }
           return todo;
         } );
-      } else if ( e.content.eventType === 'deleteTodo' ) {
-        todolist = todolist.filter( todo => todo.id !== Number( e.content.data.id ) );
+      } else if ( e.eventType === 'deleteTodo' ) {
+        todolist = todolist.filter( todo => todo.id !== Number( data.id ) );
       }
     } );
     return todolist;
@@ -77,34 +77,15 @@ let es = {};
     return new Promise( ( resolve, reject ) => {
       $.ajax( {
         type: 'GET',
-        url,
+        url: url + '?embed=body',
         headers: {
           Accept: 'application/vnd.eventstore.atom+json'
         }
       } ).done( ( d ) => {
+        console.log( 'EVENTS', d );
         resolve( d.entries );
       } );
     } );
-  }
-
-  // Get  Data of All Entries
-  let getDataPromiseList = ( entries, events ) => {
-    let list = [];
-    entries.forEach( v => {
-      list.push( new Promise( ( resolve, reject ) => {
-        $.ajax( {
-          type: 'GET',
-          url: v.id,
-          headers: {
-            Accept: 'application/vnd.eventstore.atom+json'
-          }
-        } ).done( d => {
-          events.push( d );
-          resolve();
-        } );
-      } ) );
-    } );
-    return list;
   }
 
 } )();
