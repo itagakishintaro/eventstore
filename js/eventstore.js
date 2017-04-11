@@ -20,6 +20,7 @@ let es = {};
     } );
   }
 
+  // Toggle Done
   es.toggleDone = ( todo ) => {
     console.log( 'TOGGLE DONE', todolist );
     $.ajax( {
@@ -29,6 +30,20 @@ let es = {};
       contentType: 'application/json',
       headers: {
         'ES-EventType': 'toggleDone'
+      }
+    } );
+  }
+
+  // Delete To Do
+  es.deleteTodo = ( todo ) => {
+    console.log( 'DELETE TODO', todolist );
+    $.ajax( {
+      type: 'POST',
+      url,
+      data: JSON.stringify( todo ),
+      contentType: 'application/json',
+      headers: {
+        'ES-EventType': 'deleteTodo'
       }
     } );
   }
@@ -61,7 +76,7 @@ let es = {};
           return todo;
         } );
       } else if ( e.content.eventType === 'deleteTodo' ) {
-        todolist = todolist.filter( todo => todo.id !== e.content.data.id );
+        todolist = todolist.filter( todo => todo.id !== Number( e.content.data.id ) );
       }
     } );
     return todolist;

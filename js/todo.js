@@ -117,8 +117,11 @@ let todolist = [];
     $( `#${id}` ).parents( 'li' ).remove();
     // data remove
     todolist = todolist.filter( ( v ) => v.id !== Number( id ) );
+    let todo = {
+      id,
+    };
     if ( eventstore ) { // eventstore
-
+      es.deleteTodo( todo );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
     }
