@@ -1,7 +1,7 @@
 let es = {};
 
 ( () => {
-  const url = 'http://127.0.0.1:2113/streams/todolist'
+  const streamUrl = 'http://127.0.0.1:2113/streams/todolist'
 
   /********** COMMANDS **********/
   // common function
@@ -9,7 +9,7 @@ let es = {};
     console.log( eventType, todolist );
     $.ajax( {
       type: 'POST',
-      url,
+      url: streamUrl,
       data: JSON.stringify( todo ),
       contentType: 'application/json',
       headers: {
@@ -40,16 +40,16 @@ let es = {};
   /********** QUERY **********/
   // Get To Do List
   es.getTodolist = ( showListItems ) => {
-      console.log( 'GET TODO LIST', todolist );
       let events = [];
-      getEntriesPromise().then( ( d ) => {
-        todolist = aggregate( d );
+      getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
+        todolist = aggregate( e );
         showListItems();
       } );
     }
     /********** Aggregate **********/
     // aggregate todo list from events
   let aggregate = events => {
+    console.log( 'AGGREGATE', events );
     let todolist = [];
     events = util.sortObjects( events, 'updated', true );
     events.forEach( e => {
@@ -58,7 +58,6 @@ let es = {};
         todolist.push( data );
       } else if ( e.eventType === 'toggleDone' ) {
         todolist.map( todo => {
-          console.log( 'HERE', todo.id, data.id );
           if ( todo.id === Number( data.id ) ) {
             todo.done = data.done;
           }
@@ -73,17 +72,23 @@ let es = {};
 
   /********** HELPERS **********/
   // Get Entries Promise
-  let getEntriesPromise = () => {
+  let getEntriesPromise = ( url, entries ) => {
     return new Promise( ( resolve, reject ) => {
       $.ajax( {
         type: 'GET',
-        url: url + '?embed=body',
+        url,
         headers: {
-          Accept: 'application/vnd.eventstore.atom+json'
-        }
+          Accept: 'application/vnd.eventstore.atom+json',
+        },
       } ).done( ( d ) => {
-        console.log( 'EVENTS', d );
-        resolve( d.entries );
+        let previous = d.links.filter( v => v.relation === 'previous' )[ 0 ];
+        if ( previous ) {
+          getEntriesPromise( previous.uri + '?embed=body', entries.concat( d.entries ) ).then( d => {
+            resolve( d );
+          } );
+        } else {
+          resolve( entries.concat( d.entries ) );
+        }
       } );
     } );
   }
