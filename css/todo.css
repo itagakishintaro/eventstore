@@ -1,7 +1,7 @@
 .del {
   margin-left: 1em;
 }
-.deleted {
+.done {
   color: lightgray;
   text-decoration: line-through;
 }

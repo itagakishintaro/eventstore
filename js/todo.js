@@ -42,7 +42,7 @@ let todolist = [];
               <span class="mdl-list__item-primary-content">
                 <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${v.id}">
                   <input type="checkbox" id="${v.id}" class="mdl-checkbox__input todo" ${v.done? 'checked': ''} />
-                  <span class="mdl-checkbox__label ${v.done? 'deleted': ''}">${v.title}</span>
+                  <span class="mdl-checkbox__label ${v.done? 'done': ''}">${v.title}</span>
                 </label>
               </span>
               <span class="mdl-list__item-secondary-action">
@@ -61,7 +61,7 @@ let todolist = [];
   let setEvents = () => {
     // toggle
     $( '.todo' ).on( 'click', function () {
-      $( this ).next( 'span' ).toggleClass( "deleted" );
+      $( this ).next( 'span' ).toggleClass( "done" );
       toggleDone( this );
     } );
     // delete
