@@ -4,48 +4,37 @@ let es = {};
   const url = 'http://127.0.0.1:2113/streams/todolist'
 
   /********** COMMANDS **********/
-  // Add To Do
-  es.addTodo = ( todo, showListItems ) => {
-    console.log( 'ADD TODO', todolist );
+  // common function
+  let command = ( todo, eventType, callback ) => {
+    console.log( eventType, todolist );
     $.ajax( {
       type: 'POST',
       url,
       data: JSON.stringify( todo ),
       contentType: 'application/json',
       headers: {
-        'ES-EventType': 'addTodo'
+        'ES-EventType': eventType
       }
     } ).done( d => {
-      showListItems();
+      if ( callback ) {
+        callback();
+      }
     } );
+  }
+
+  // Add To Do
+  es.addTodo = ( todo, showListItems ) => {
+    command( todo, 'addTodo', showListItems );
   }
 
   // Toggle Done
   es.toggleDone = ( todo ) => {
-    console.log( 'TOGGLE DONE', todolist );
-    $.ajax( {
-      type: 'POST',
-      url,
-      data: JSON.stringify( todo ),
-      contentType: 'application/json',
-      headers: {
-        'ES-EventType': 'toggleDone'
-      }
-    } );
+    command( todo, 'toggleDone' );
   }
 
   // Delete To Do
   es.deleteTodo = ( todo ) => {
-    console.log( 'DELETE TODO', todolist );
-    $.ajax( {
-      type: 'POST',
-      url,
-      data: JSON.stringify( todo ),
-      contentType: 'application/json',
-      headers: {
-        'ES-EventType': 'deleteTodo'
-      }
-    } );
+    command( todo, 'deleteTodo' );
   }
 
   /********** QUERY **********/
