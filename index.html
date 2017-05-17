@@ -25,6 +25,7 @@
     <main class="mdl-layout__content">
       <div class="page-content">
         <div class="mdl-grid">
+
           <div class="mdl-cell mdl-cell--12-col">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="eventstore">
               <input type="checkbox" id="eventstore" class="mdl-switch__input">
@@ -46,6 +47,24 @@
             <ul class="demo-list-control mdl-list">
             </ul>
           </div>
+
+          <hr>
+
+          <div id="timemachine" style="display:none">
+            <span class="mdl-chip">
+              <span class="mdl-chip__text">Time Machine! (0 ~
+                <span id="maxEventNumber"></span>)</span>
+            </span>
+            <div class="mdl-cell mdl-cell--12-col">
+              <div class="mdl-textfield mdl-js-textfield">
+                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="eventNumber">
+                <label class="mdl-textfield__label" for="eventNumber">Event Number</label>
+                <span class="mdl-textfield__error">Input is not a number!</span>
+              </div>
+              <span id="goBack" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Go Back!</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </main>

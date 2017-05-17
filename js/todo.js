@@ -9,11 +9,15 @@ let todolist = [];
     // eventstore event
     $( '#eventstore' ).on( 'click', () => {
       eventstore = $( '#eventstore' ).prop( 'checked' );
+      $( '#timemachine' ).toggle();
       showList();
     } );
     // add event
     $( '#addTodo' ).on( 'click', () => {
       addTodo();
+    } );
+    $( '#goBack' ).on( 'click', () => {
+      showList( $( '#eventNumber' ).val() );
     } );
   } );
 
@@ -21,10 +25,10 @@ let todolist = [];
   let clearList = () => $( '#list ul' ).empty();
 
   // Show List
-  let showList = () => {
+  let showList = ( eventNumber ) => {
     console.log( 'SHOW LIST', todolist );
     if ( eventstore ) { // eventstore
-      es.getTodolist( showListItems );
+      es.getTodolist( showListItems, eventNumber );
     } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
       showListItems();

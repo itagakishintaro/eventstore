@@ -39,10 +39,21 @@ let es = {};
 
   /********** QUERY **********/
   // Get To Do List
-  es.getTodolist = ( showListItems ) => {
+  es.getTodolist = ( showListItems, eventNumber ) => {
       let events = [];
       getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
-        todolist = aggregate( e );
+        let max = Math.max.apply( null, e.map( o => {
+          return o.eventNumber;
+        } ) );
+        $( '#maxEventNumber' ).text( max );
+
+        let filtered = e;
+        if ( eventNumber ) {
+          filtered = e.filter( data => {
+            return data.eventNumber <= eventNumber;
+          } );
+        }
+        todolist = aggregate( filtered );
         showListItems();
       } );
     }
