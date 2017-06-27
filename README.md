@@ -98,12 +98,11 @@ curl -i http://127.0.0.1:2113/streams/newstream/0 -H "Accept: application/json"
 ```
 
 # EventStoreを使わないToDoアプリをつくる
-まず、EventStoreを使わず、ブラウザのLocal Storageを使ったToDOアプリをつくります。
+まず、EventStoreを使わず、ブラウザのLocal Storageを使ったToDoアプリをつくります。
+任意のフォルダを用意したら、その中に`css`と`js`というフォルダを作成します。
 
 ## htmlの作成
-次のとおり、`index.html`と`todo.css`を作成します。
-[Material Design Lite](https://getmdl.io/)とjQueryを使用しています。
-Material Design Liteを使って装飾しているため、複雑にみえるかもしれませんが、よくみると、ヘッダーとテキストボックスとボタンだけのフォームとリスト(ul)があるだけなのがわかると思います。
+次のとおり、`index.html`と`css/todo.css`を作成します。
 
 ```html
 <!DOCTYPE html>
@@ -112,58 +111,66 @@ Material Design Liteを使って装飾しているため、複雑にみえるか
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-  <link rel="stylesheet" href="todo.css">
-  <title>ToDo</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css">
+  <link rel="stylesheet" href="css/todo.css">
+  <title>ToDo List</title>
 </head>
 
 <body>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header">
-      <div class="mdl-layout__header-row">
-        <!-- Title -->
-        <span class="mdl-layout-title">To Do List</span>
-      </div>
-    </header>
-    <div class="mdl-layout__drawer">
-      <span class="mdl-layout-title">Top</span>
+  <!-- Header -->
+  <nav class="header teal lighten-2">
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo">TODO LIST</a>
     </div>
-    <main class="mdl-layout__content">
-      <div class="page-content">
-        <div class="mdl-grid">
+  </nav>
 
-          <div class="mdl-cell mdl-cell--6-col">
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input class="mdl-textfield__input" type="text" id="newTodo">
-                <label class="mdl-textfield__label" for="newTodo">Text...</label>
-              </div>
-              <span id="addTodo" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Add</span>
-            </form>
-          </div>
-
-          <div id="list" class="mdl-cell mdl-cell--6-col">
-            <ul class="demo-list-control mdl-list">
-            </ul>
-          </div>
-
+  <div class="container">
+    <div class="row">
+      <!-- Input ToDo-->
+      <form class="col s12 m6">
+        <div class="input-field">
+          <input id="newTodo" type="text" placeholder="Text...">
+          <label for="newTodo"></label>
+          <a id="addTodo" class="waves-effect waves-light btn">Add</a>
         </div>
+      </form>
+
+      <!-- ToDo LIst -->
+      <div id="list" class="col s12 m6">
+        <ul class="collection">
+          <li v-for="todo in todolist" class="collection-item">
+            <!-- Toggle DONE -->
+            <span v-bind:for="todo.id">
+              <input type="checkbox" v-bind:id="todo.id" v-model="todo.done" v-on:click="toggleDone" />
+              <label v-bind:for="todo.id" v-bind:class="{done: todo.done}">{{todo.title}}</label>
+            </span>
+            <!-- Delete ICON -->
+            <i class="material-icons del" v-bind:data-id="todo.id" v-on:click="deleteTodo">delete</i>
+          </li>
+        </ul>
       </div>
-    </main>
+    </div>
   </div>
 
+  <script src=" https://unpkg.com/vue" charset="utf-8"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="util.js" charset="utf-8"></script>
-  <script src="todo.js" charset="utf-8"></script>
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+  <script src="js/util.js" charset="utf-8"></script>
+  <script src="js/todo.js" charset="utf-8"></script>
 </body>
 
 </html>
 ```
 
 ```css
+.header{
+  margin-bottom: 1em;
+}
 .del {
+  float: right;
   margin-left: 1em;
 }
 .done {
@@ -172,71 +179,62 @@ Material Design Liteを使って装飾しているため、複雑にみえるか
 }
 ```
 
-次に`todo.js`と`util.js`を作成します。
+[Materialize](http://materializecss.com/)と[Vue.js](https://jp.vuejs.org/), jQueryを使用していますが、最低限の利用なのであまり気にする必要はありません。。
+Materializedを使って装飾しているため、複雑にみえるかもしれませんが、よくみると、ヘッダー、テキストボックスとボタンだけのフォーム、ToDoのリスト(ul)というシンプルな構成なのがわかると思います。
+
+次に`js/todo.js`と`js/util.js`を作成します。
 
 ```js
 let todolist = [];
 
 ( () => {
+  let todolistVue;
+  let eventstore = $( '#eventstore' ).prop( 'checked' );
+
   // Document Ready
   $( () => {
-    showList();
+    // todolist data binding
+    todolistVue = new Vue( {
+      el: '#list',
+      data: {
+        todolist
+      },
+      methods: {
+        toggleDone: event => {
+          $( event.target ).next( 'label' ).toggleClass( "done" );
+          toggleDone( event.target );
+        },
+        deleteTodo: event => {
+          deleteTodo( event.target );
+        }
+      }
+    } );
+    // get and show list
+    getAndShowList();
     // add event
     $( '#addTodo' ).on( 'click', () => {
       addTodo();
     } );
   } );
 
-  // Clear List
-  let clearList = () => $( '#list ul' ).empty();
-
-  // Show List
-  let showList = () => {
-      todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-      showListItems();
-    }
-
-  // Show List Items
-  let showListItems = () => {
-    clearList();
-    todolist = util.sortObjects( todolist, 'id', false );
-    todolist.forEach( v => {
-      let item = `
-            <li class="mdl-list__item">
-              <span class="mdl-list__item-primary-content">
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${v.id}">
-                  <input type="checkbox" id="${v.id}" class="mdl-checkbox__input todo" ${v.done? 'checked': ''} />
-                  <span class="mdl-checkbox__label ${v.done? 'done': ''}">${v.title}</span>
-                </label>
-              </span>
-              <span class="mdl-list__item-secondary-action">
-                <span class="del" data-id="${v.id}">
-                  <i class="material-icons">delete</i>
-                  </span>
-              </span>
-            </li>
-          `;
-      $( '#list ul' ).append( item );
-    } );
-    setEvents();
+  // Get and show List
+  let getAndShowList = () => {
+    console.log( 'GET AND SHOW LIST', todolist );
+    todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
+    showList();
   }
 
-  // Set Events
-  let setEvents = () => {
-    // toggle
-    $( '.todo' ).on( 'click', function () {
-      $( this ).next( 'span' ).toggleClass( "done" );
-      toggleDone( this );
-    } );
-    // delete
-    $( '.del' ).on( 'click', function () {
-      deleteTodo( this );
-    } );
+  // Show List Items
+  let showList = () => {
+    console.log( 'SHOW LIST', todolist );
+    todolist = util.sortObjects( todolist, 'id', false );
+    todolistVue.todolist = todolist;
   }
 
   /*********** ACTIONS **********/
   // Add Todo
   let addTodo = () => {
+    console.log( 'ADD TODO', todolist );
     let id = new Date().getTime();
     let todo = {
       id,
@@ -245,11 +243,12 @@ let todolist = [];
     };
     todolist.push( todo );
     localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-    showListItems();
+    showList();
   }
 
   // Toggle Done
   let toggleDone = target => {
+    console.log( 'TOGGLE DONE', todolist );
     // data toggle
     todolist = todolist.map( ( v ) => {
       if ( v.id === Number( $( target ).attr( 'id' ) ) ) {
@@ -266,6 +265,7 @@ let todolist = [];
 
   // Delete Todo
   let deleteTodo = target => {
+    console.log( 'DELETE TODO', todolist );
     // view remove
     let id = $( target ).attr( 'data-id' );
     $( `#${id}` ).parents( 'li' ).remove();
@@ -307,20 +307,20 @@ let util = {};
 }
 ```
 
-`showList()`では、localStorageからtodolistを取得し、`showListItems()`を呼び出してtodoをリストアイテムとして表示しています。
+`getAndShowList()`では、localStorageからtodolistを取得し、`showList()`を呼び出してtodoをリストアイテムとして表示しています。
 
 # EventStoreを使ったToDoアプリをつくる
 ## 登録(Command)
-まず、`todo.js`の`addTodo`関数を次のように修正します。
+まず、`js/todo.js`の`addTodo`関数の最後の部分を次のように修正します。
 
 ```js
 // localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-es.addTodo( todo, showListItems );
-// showListItems();
+es.addTodo( todo, showList );
+// showList();
 ```
 
 JavaScriptに慣れていない人は、第2引数に関数を渡しているのが奇妙にみえるかもしれませんが、JavaScriptではよくあることです。
-今回、`todo.js`は、次のような不思議なもので囲まれていますが、これは即時関数といって、定義した変数や関数をカプセル化して外からアクセスできないようにしています。
+今回、`js/todo.js`は、次のような記述で囲まれていますが、これは即時関数といって、定義した変数や関数をカプセル化して外部と変数などが衝突しないようにしています。
 
 ```
 ( () => {
@@ -356,8 +356,8 @@ let es = {};
   }
 
   // Add To Do
-  es.addTodo = ( todo, showListItems ) => {
-    command( todo, 'addTodo', showListItems );
+  es.addTodo = ( todo, showList ) => {
+    command( todo, 'addTodo', showList );
   }
 
 } )();
@@ -369,11 +369,10 @@ Event Store利用のポイントは、`contentType`と`headers`です。公式�
 
 [Writing to a Stream](http://docs.geteventstore.com/http-api/4.0.0/writing-to-a-stream/)
 
-最後に、`index.html`に`eventstore.js`の読み込み処理を追加します。
+最後に、`index.html`に`js/eventstore.js`の読み込み処理を追加します。
 
 ```html
-  <script src="todo.js" charset="utf-8"></script>
-  <script src="eventstore.js" charset="utf-8"></script>
+  <script src="js/eventstore.js" charset="utf-8"></script>
 </body>
 ```
 
@@ -386,7 +385,7 @@ Recently Changed Streams: todolist
 ```
 
 ## 更新、削除(Command)
-`todo.js`の`toggleDone`関数と`deleteTodo`関数を次のように修正します。
+`js/todo.js`の`toggleDone`関数と`deleteTodo`関数を次のように修正します。
 
 
 ```js
@@ -399,9 +398,7 @@ es.toggleDone( todo );
 es.deleteTodo( todo );
 ```
 
-次に、`eventstore.js`に以下を追加します。
-画面からイベントの更新、削除をし、Event Storeにアクセスして、イベントが登録されていることを確認します。
-(現在、画面に表示されているのはlocalStorageに登録されているものです。localStorageにデータを登録していない場合は画面からは確認できませんので、確認はあとからでかまいません。)
+次に、`js/eventstore.js`に以下を追加します。
 
 ```
 // Toggle Done
@@ -415,13 +412,16 @@ es.deleteTodo = ( todo ) => {
 }
 ```
 
+画面からイベントの更新、削除をし、Event Storeにアクセスして、イベントが登録されていることを確認します。
+(現在、画面に表示されているのはlocalStorageに登録されているものです。localStorageにデータを登録していない場合は画面からは確認できませんので、確認はあとからでかまいません。)
+
 ## 参照(Query)
-まず、`todo.js`の`showList`関数を次のように修正します。
+まず、`js/todo.js`の`showList`関数を次のように修正します。
 
 ```js
 // todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-// showListItems();
-es.getTodolist( showListItems );
+// showList();
+es.getTodolist( showList );
 ```
 
 次に、`eventstore.js`に次を追加します。
@@ -429,11 +429,11 @@ es.getTodolist( showListItems );
 ```js
 /********** QUERY **********/
 // Get To Do List
-es.getTodolist = ( showListItems ) => {
+es.getTodolist = ( showList ) => {
     let events = [];
     getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
       todolist = aggregate( e );
-      showListItems();
+      showList();
     } );
   }
   /********** Aggregate **********/
@@ -504,25 +504,21 @@ Event Storeのその他の仕様は公式サイトで確認してください。
 `index.html`に以下を追加します。
 
 ```html
-<hr>
-
-<div id="timemachine">
-  <span class="mdl-chip">
-    <span class="mdl-chip__text">Time Machine! (0 ~
-      <span id="maxEventNumber"></span>)</span>
+<!-- Time Machine -->
+<div id="timemachine" style="display:none">
+  <span class="chip">
+    Time Machine! (0 ~
+    <span id="maxEventNumber"></span>)
   </span>
-  <div class="mdl-cell mdl-cell--12-col">
-    <div class="mdl-textfield mdl-js-textfield">
-      <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="eventNumber">
-      <label class="mdl-textfield__label" for="eventNumber">Event Number</label>
-      <span class="mdl-textfield__error">Input is not a number!</span>
-    </div>
-    <span id="goBack" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Go Back!</span>
+  <div class="input-field">
+    <input class="validate" type="number" id="eventNumber" placeholder="Event Number">
+    <label for="eventNumber" data-error="Input is not a number!"></label>
   </div>
+  <a id="goBack" class="waves-effect waves-light btn">Go Back!</a>
 </div>
 ```
 
-次に`todo.js`と`eventstore.js`を次のように変更します。
+次に`js/todo.js`と`js/eventstore.js`を次のように変更します。
 
 ```js
 // add event
@@ -543,7 +539,7 @@ let showList = ( eventNumber ) => {
 ```
 
 ```js
-es.getTodolist = ( showListItems, eventNumber ) => {
+es.getTodolist = ( showList, eventNumber ) => {
     let events = [];
     getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
       let max = Math.max.apply( null, e.map( o => {
@@ -558,7 +554,7 @@ es.getTodolist = ( showListItems, eventNumber ) => {
         } );
       }
       todolist = aggregate( filtered );
-      showListItems();
+      showList();
     } );
   }
 ```

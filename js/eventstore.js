@@ -23,8 +23,8 @@ let es = {};
   }
 
   // Add To Do
-  es.addTodo = ( todo, showListItems ) => {
-    command( todo, 'addTodo', showListItems );
+  es.addTodo = ( todo, showList ) => {
+    command( todo, 'addTodo', showList );
   }
 
   // Toggle Done
@@ -39,7 +39,7 @@ let es = {};
 
   /********** QUERY **********/
   // Get To Do List
-  es.getTodolist = ( showListItems, eventNumber ) => {
+  es.getTodolist = ( showList, eventNumber ) => {
       let events = [];
       getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
         let max = Math.max.apply( null, e.map( o => {
@@ -54,7 +54,7 @@ let es = {};
           } );
         }
         todolist = aggregate( filtered );
-        showListItems();
+        showList();
       } );
     }
     /********** Aggregate **********/

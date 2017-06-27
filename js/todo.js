@@ -24,15 +24,17 @@ let todolist = [];
     } );
     // get and show list
     getAndShowList();
-    // eventstore event
-    $( '#eventstore' ).on( 'click', () => {
-      eventstore = $( '#eventstore' ).prop( 'checked' );
-      $( '#timemachine' ).toggle();
-      getAndShowList();
-    } );
+
     // add event
     $( '#addTodo' ).on( 'click', () => {
       addTodo();
+    } );
+    // eventstore event
+    $( '#eventstore' ).on( 'click', () => {
+      console.log( 'TOGGLE EVENTSTORE' );
+      eventstore = $( '#eventstore' ).prop( 'checked' );
+      $( '#timemachine' ).toggle();
+      getAndShowList();
     } );
     $( '#goBack' ).on( 'click', () => {
       getAndShowList( $( '#eventNumber' ).val() );
