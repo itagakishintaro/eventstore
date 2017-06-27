@@ -1,4 +1,8 @@
+.header{
+  margin-bottom: 1em;
+}
 .del {
+  float: right;
   margin-left: 1em;
 }
 .done {

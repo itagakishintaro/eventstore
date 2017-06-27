@@ -1,77 +1,60 @@
 let todolist = [];
 
 ( () => {
+  let todolistVue;
   let eventstore = $( '#eventstore' ).prop( 'checked' );
 
   // Document Ready
   $( () => {
-    showList();
+    // todolist data binding
+    todolistVue = new Vue( {
+      el: '#list',
+      data: {
+        todolist
+      },
+      methods: {
+        toggleDone: event => {
+          $( event.target ).next( 'label' ).toggleClass( "done" );
+          toggleDone( event.target );
+        },
+        deleteTodo: event => {
+          deleteTodo( event.target );
+        }
+      }
+    } );
+    // get and show list
+    getAndShowList();
     // eventstore event
     $( '#eventstore' ).on( 'click', () => {
       eventstore = $( '#eventstore' ).prop( 'checked' );
       $( '#timemachine' ).toggle();
-      showList();
+      getAndShowList();
     } );
     // add event
     $( '#addTodo' ).on( 'click', () => {
       addTodo();
     } );
     $( '#goBack' ).on( 'click', () => {
-      showList( $( '#eventNumber' ).val() );
+      getAndShowList( $( '#eventNumber' ).val() );
     } );
   } );
 
-  // Clear List
-  let clearList = () => $( '#list ul' ).empty();
-
-  // Show List
-  let showList = ( eventNumber ) => {
-    console.log( 'SHOW LIST', todolist );
+  // Get and show List
+  let getAndShowList = ( eventNumber ) => {
+    console.log( 'GET AND SHOW LIST', todolist );
     if ( eventstore ) { // eventstore
-      es.getTodolist( showListItems, eventNumber );
+      es.getTodolist( showList, eventNumber );
     } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-      showListItems();
+      showList();
     }
   }
 
   // Show List Items
-  let showListItems = () => {
-    console.log( 'SHOW LIST ITEMS', todolist );
-    clearList();
+  let showList = () => {
+    console.log( 'SHOW LIST', todolist );
     todolist = util.sortObjects( todolist, 'id', false );
-    todolist.forEach( v => {
-      let item = `
-            <li class="mdl-list__item">
-              <span class="mdl-list__item-primary-content">
-                <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="${v.id}">
-                  <input type="checkbox" id="${v.id}" class="mdl-checkbox__input todo" ${v.done? 'checked': ''} />
-                  <span class="mdl-checkbox__label ${v.done? 'done': ''}">${v.title}</span>
-                </label>
-              </span>
-              <span class="mdl-list__item-secondary-action">
-                <span class="del" data-id="${v.id}">
-                  <i class="material-icons">delete</i>
-                  </span>
-              </span>
-            </li>
-          `;
-      $( '#list ul' ).append( item );
-    } );
-    setEvents();
-  }
-
-  // Set Events
-  let setEvents = () => {
-    // toggle
-    $( '.todo' ).on( 'click', function () {
-      $( this ).next( 'span' ).toggleClass( "done" );
-      toggleDone( this );
-    } );
-    // delete
-    $( '.del' ).on( 'click', function () {
-      deleteTodo( this );
-    } );
+    todolistVue.todolist = todolist;
   }
 
   /*********** ACTIONS **********/
@@ -86,10 +69,10 @@ let todolist = [];
     };
     todolist.push( todo );
     if ( eventstore ) { // eventstore
-      es.addTodo( todo, showListItems );
+      es.addTodo( todo, showList );
     } else { // localstorage
       localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-      showListItems();
+      showList();
     }
   }
 
