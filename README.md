@@ -416,7 +416,7 @@ es.deleteTodo = ( todo ) => {
 (現在、画面に表示されているのはlocalStorageに登録されているものです。localStorageにデータを登録していない場合は画面からは確認できませんので、確認はあとからでかまいません。)
 
 ## 参照(Query)
-まず、`js/todo.js`の`showList`関数を次のように修正します。
+まず、`js/todo.js`の`getAndShowList`関数を次のように修正します。
 
 ```js
 // todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
@@ -505,7 +505,7 @@ Event Storeのその他の仕様は公式サイトで確認してください。
 
 ```html
 <!-- Time Machine -->
-<div id="timemachine" style="display:none">
+<div id="timemachine">
   <span class="chip">
     Time Machine! (0 ~
     <span id="maxEventNumber"></span>)
@@ -526,15 +526,15 @@ $( '#addTodo' ).on( 'click', () => {
   addTodo();
 } );
 $( '#goBack' ).on( 'click', () => {
-  showList( $( '#eventNumber' ).val() );
+  getAndShowList( $( '#eventNumber' ).val() );
 } );
 
 
-// Show List
+// Get and show List
 let showList = ( eventNumber ) => {
   // todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-  // showListItems();
-  es.getTodolist( showListItems, eventNumber );
+  // showList();
+  es.getTodolist( showList, eventNumber );
 }
 ```
 
