@@ -38,8 +38,8 @@ let es = {};
   }
 
   /********** QUERY **********/
-  // Get To Do List
-  es.getTodolist = ( showList, eventNumber ) => {
+  // Get and show list
+  es.getAndShowList = ( showList, eventNumber ) => {
       let events = [];
       getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
         let max = Math.max.apply( null, e.map( o => {

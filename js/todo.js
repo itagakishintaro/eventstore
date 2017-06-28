@@ -45,7 +45,7 @@ let todolist = [];
   let getAndShowList = ( eventNumber ) => {
     console.log( 'GET AND SHOW LIST', todolist );
     if ( eventstore ) { // eventstore
-      es.getTodolist( showList, eventNumber );
+      es.getAndShowList( showList, eventNumber );
     } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
       todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
       showList();

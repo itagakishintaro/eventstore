@@ -24,19 +24,20 @@ EventStoreは、このGreg Youngが起こしたスタートアップによって
 # 準備
 ## curl
 動作確認にcurlコマンドを使うため、以下のサイトからGit Bashをインストールします。
-(curlが使えればよいので、Git Bashでなくてもかまいません。)
+(curlが使えれば、Git Bashでなくてもかまいません。)
 
 https://git-for-windows.github.io/
 
 ## Webブラウザー
 このチュートリアルではECMA Script 6の記法を使用します。
-そのため、ChromeかFIrefoxをインストールします。
+そのため、ChromeかFirefoxかEdgeをインストールします。
 
 # EventStoreのインストール
 公式サイト:http://docs.geteventstore.com/introduction/latest
 
 ## インストール
-次のページからインストーラーをダウンロードし、インストールします。
+次のページからインストーラーをダウンロードし、任意のフォルダに解凍してください。
+これでインストールは完了です。
 https://geteventstore.com/downloads/
 
 ## 起動
@@ -179,7 +180,7 @@ curl -i http://127.0.0.1:2113/streams/newstream/0 -H "Accept: application/json"
 }
 ```
 
-[Materialize](http://materializecss.com/)と[Vue.js](https://jp.vuejs.org/), jQueryを使用していますが、最低限の利用なのであまり気にする必要はありません。。
+[Materialize](http://materializecss.com/)と[Vue.js](https://jp.vuejs.org/)とjQueryを使用していますが、最低限の利用にしているので知らなくても問題ありません。
 Materializedを使って装飾しているため、複雑にみえるかもしれませんが、よくみると、ヘッダー、テキストボックスとボタンだけのフォーム、ToDoのリスト(ul)というシンプルな構成なのがわかると思います。
 
 次に`js/todo.js`と`js/util.js`を作成します。
@@ -309,6 +310,8 @@ let util = {};
 
 `getAndShowList()`では、localStorageからtodolistを取得し、`showList()`を呼び出してtodoをリストアイテムとして表示しています。
 
+index.htmlをブラウザで開き、ToDoリストができていることを確認します。
+
 # EventStoreを使ったToDoアプリをつくる
 ## 登録(Command)
 まず、`js/todo.js`の`addTodo`関数の最後の部分を次のように修正します。
@@ -317,15 +320,6 @@ let util = {};
 // localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
 es.addTodo( todo, showList );
 // showList();
-```
-
-JavaScriptに慣れていない人は、第2引数に関数を渡しているのが奇妙にみえるかもしれませんが、JavaScriptではよくあることです。
-今回、`js/todo.js`は、次のような記述で囲まれていますが、これは即時関数といって、定義した変数や関数をカプセル化して外部と変数などが衝突しないようにしています。
-
-```
-( () => {
-
-} )();
 ```
 
 次に、`eventsotre.js`次の内容で作成します。
@@ -412,24 +406,24 @@ es.deleteTodo = ( todo ) => {
 }
 ```
 
-画面からイベントの更新、削除をし、Event Storeにアクセスして、イベントが登録されていることを確認します。
-(現在、画面に表示されているのはlocalStorageに登録されているものです。localStorageにデータを登録していない場合は画面からは確認できませんので、確認はあとからでかまいません。)
+まだ参照の機能を作成していないので、現在、画面に表示されているのはlocalStorageに登録されているものです。
+そのため、ここでは画面からの確認は一旦後にして、次の参照の作成に進みます。
 
 ## 参照(Query)
-まず、`js/todo.js`の`getAndShowList`関数を次のように修正します。
+`js/todo.js`の`getAndShowList`関数を次のように修正します。
 
 ```js
 // todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
 // showList();
-es.getTodolist( showList );
+es.getAndShowList( showList );
 ```
 
 次に、`eventstore.js`に次を追加します。
 
 ```js
 /********** QUERY **********/
-// Get To Do List
-es.getTodolist = ( showList ) => {
+// Get  and show list
+es.getAndShowList = ( showList ) => {
     let events = [];
     getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
       todolist = aggregate( e );
@@ -484,7 +478,7 @@ let getEntriesPromise = ( url, entries ) => {
 }
 ```
 
-少し込み入っていますが、`es.getTodolist`は`getEntriesPromise`を呼び出してイベントを取得し、`aggregate`を呼び出して集計しています。
+少し込み入っていますが、`es.getAndShowList`は`getEntriesPromise`を呼び出してイベントを取得し、`aggregate`を呼び出して集計しています。
 この集計処理が必要なところがイベントソーシングのポイントです。
 Event Storeにはデータの状態(値)ではなく、イベントが登録されているだけなので、イベントからデータの状態(値)を再現する必要があります。
 
@@ -496,8 +490,11 @@ Event Storeのその他の仕様は公式サイトで確認してください。
 
 [Reading Streams and Events](http://docs.geteventstore.com/http-api/4.0.0/reading-streams/)
 
+index.htmlをブラウザで開き動作を確認します。
+EventStoreにaddTodo, toggleDone, deleteTodoの各イベントが登録されていることも確認します。
+
 # 任意の時点の状態を再現する
-ここまででEvent Storeの基本的な使い方は終了ですが、この使い方では従来のRDBと変わりません。
+ここまででEvent Storeの基本的な使い方は終了ですが、この使い方では従来と変わりません。
 イベントソーシングのよさを少しでも感じるために、イベントソーシングの特徴の1つである「任意の時点の状態を再現できる」機能を追加します。
 (もちろん、イベントソーシングの強みはこれだけではなく、これはほんの一部です)
 
@@ -531,15 +528,16 @@ $( '#goBack' ).on( 'click', () => {
 
 
 // Get and show List
-let showList = ( eventNumber ) => {
+let getAndShowList = ( eventNumber ) => {
+  console.log( 'GET AND SHOW LIST', todolist );
   // todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
   // showList();
-  es.getTodolist( showList, eventNumber );
+  es.getAndShowList( showList, eventNumber );
 }
 ```
 
 ```js
-es.getTodolist = ( showList, eventNumber ) => {
+es.getAndShowList = ( showList, eventNumber ) => {
     let events = [];
     getEntriesPromise( streamUrl + '/0/forward/100?embed=body', [] ).then( e => {
       let max = Math.max.apply( null, e.map( o => {
