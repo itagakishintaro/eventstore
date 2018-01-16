@@ -32,6 +32,7 @@ let todolist = [];
     // eventstore event
     $( '#eventstore' ).on( 'click', () => {
       console.log( 'TOGGLE EVENTSTORE' );
+      $( '#newTodo' ).val('');
       eventstore = $( '#eventstore' ).prop( 'checked' );
       $( '#timemachine' ).toggle();
       getAndShowList();
@@ -54,7 +55,7 @@ let todolist = [];
 
   // Show List Items
   let showList = () => {
-    console.log( 'SHOW LIST', todolist );
+    console.log( 'SHOW LIST', todolist,  todolistVue.todolist);
     todolist = util.sortObjects( todolist, 'id', false );
     todolistVue.todolist = todolist;
   }

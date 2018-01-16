@@ -100,6 +100,9 @@ let es = {};
         } else {
           resolve( entries.concat( d.entries ) );
         }
+      } ).fail( ( err ) =>{
+        console.error( 'ERROR', err );
+        resolve([]);
       } );
     } );
   }

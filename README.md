@@ -473,6 +473,9 @@ let getEntriesPromise = ( url, entries ) => {
       } else {
         resolve( entries.concat( d.entries ) );
       }
+    } ).fail( ( err ) =>{
+      console.error( 'ERROR', err );
+      resolve([]);
     } );
   } );
 }
