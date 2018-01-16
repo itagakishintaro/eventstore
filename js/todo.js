@@ -1,4 +1,4 @@
-let todolist = [];
+todolist = [];
 
 ( () => {
   let eventstore = $( '#eventstore' ).prop( 'checked' );
@@ -27,12 +27,7 @@ let todolist = [];
   // Show List
   let showList = ( eventNumber ) => {
     console.log( 'SHOW LIST', todolist );
-    if ( eventstore ) { // eventstore
-      es.getTodolist( showListItems, eventNumber );
-    } else if ( localStorage.getItem( 'todolist' ) ) { // localstorage
-      todolist = JSON.parse( localStorage.getItem( 'todolist' ) );
-      showListItems();
-    }
+    es.getTodolist( showListItems, eventNumber );
   }
 
   // Show List Items
@@ -85,12 +80,7 @@ let todolist = [];
         done: false,
     };
     todolist.push( todo );
-    if ( eventstore ) { // eventstore
-      es.addTodo( todo, showListItems );
-    } else { // localstorage
-      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-      showListItems();
-    }
+    es.addTodo( todo, showListItems );
   }
 
   // Toggle Done
@@ -107,11 +97,7 @@ let todolist = [];
       id: $( target ).attr( 'id' ),
       done: $( target ).prop( 'checked' ),
     };
-    if ( eventstore ) { // eventstore
-      es.toggleDone( todo );
-    } else { // localstorage
-      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-    }
+    es.toggleDone( todo );
   }
 
   // Delete Todo
@@ -125,11 +111,7 @@ let todolist = [];
     let todo = {
       id,
     };
-    if ( eventstore ) { // eventstore
-      es.deleteTodo( todo );
-    } else { // localstorage
-      localStorage.setItem( 'todolist', JSON.stringify( todolist ) );
-    }
+    es.deleteTodo( todo );
   }
 
 } )();

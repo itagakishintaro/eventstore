@@ -1,4 +1,4 @@
-let util = {};
+util = {};
 
 ( () => {
   util.sortObjects = ( objects, target, asc ) => {

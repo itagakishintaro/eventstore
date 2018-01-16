@@ -26,13 +26,6 @@
       <div class="page-content">
         <div class="mdl-grid">
 
-          <div class="mdl-cell mdl-cell--12-col">
-            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="eventstore">
-              <input type="checkbox" id="eventstore" class="mdl-switch__input">
-              <span class="mdl-switch__label">EventStore</span>
-            </label>
-          </div>
-
           <div class="mdl-cell mdl-cell--6-col">
             <form action="#">
               <div class="mdl-textfield mdl-js-textfield">
@@ -50,7 +43,7 @@
 
           <hr>
 
-          <div id="timemachine" style="display:none">
+          <div id="timemachine">
             <span class="mdl-chip">
               <span class="mdl-chip__text">Time Machine! (0 ~
                 <span id="maxEventNumber"></span>)</span>
@@ -71,9 +64,13 @@
   </div>
 
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-  <script src="js/util.js" charset="utf-8"></script>
-  <script src="js/eventstore.js" charset="utf-8"></script>
-  <script src="js/todo.js" charset="utf-8"></script>
+  <!-- Minified version of `es6-promise-auto` below. -->
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
+  <script src="es5/util.js" charset="utf-8"></script>
+  <script src="es5/eventstore.js" charset="utf-8"></script>
+  <script src="es5/todo.js" charset="utf-8"></script>
 </body>
 
 </html>
